@@ -1,9 +1,9 @@
-# 👋 Hi, I'm Your Name!
+# 👋 Hi, I'm 苟苟糖!
 ### 🚀 About Me
 - 🎨 Game Technical Artist | MSc Serious Games at GSA
 - 🌱 Currently exploring Unity Shader, SRP, and rendering techniques
 - 🔭 Interested in stylized rendering, VFX, and performance optimization
-- 🎮 Favorite Game: Final Fantasy VII Rebirth
+- 🎮 Favorite Game: The legend of Zelda: Breath of Wild
 
 ### 📫 How to reach me:
 [![LinkedIn](https://img.shields.io/badge/-LinkedIn-blue?style=flat-square&logo=LinkedIn&logoColor=white)](https://www.linkedin.com/in/yourname/)
