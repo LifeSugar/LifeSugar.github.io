@@ -161,6 +161,46 @@
             color: #764ba2;
         }
 
+        .difficulty {
+            margin: 20px 0;
+        }
+
+        .difficulty-label {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .difficulty-btns {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .difficulty-btn {
+            padding: 10px 25px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .difficulty-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
         @media (max-width: 480px) {
             .board {
                 grid-template-columns: repeat(3, 90px);
@@ -179,8 +219,18 @@
 </head>
 <body>
     <div class="game-container">
-        <h1>井字棋</h1>
-        <div class="status">玩家 X 的回合</div>
+        <h1>井字棋 - 人机对战</h1>
+        
+        <div class="difficulty">
+            <div class="difficulty-label">AI难度：</div>
+            <div class="difficulty-btns">
+                <button class="difficulty-btn" onclick="setDifficulty('easy')">简单</button>
+                <button class="difficulty-btn active" onclick="setDifficulty('medium')">中等</button>
+                <button class="difficulty-btn" onclick="setDifficulty('hard')">困难</button>
+            </div>
+        </div>
+        
+        <div class="status">你的回合 (X)</div>
         
         <div class="board">
             <button class="cell" data-index="0"></button>
@@ -200,7 +250,7 @@
 
         <div class="score">
             <div class="score-item">
-                <div>玩家 X</div>
+                <div>玩家</div>
                 <span class="x-score" id="x-score">0</span>
             </div>
             <div class="score-item">
@@ -208,7 +258,7 @@
                 <span id="draw-score">0</span>
             </div>
             <div class="score-item">
-                <div>玩家 O</div>
+                <div>AI</div>
                 <span class="o-score" id="o-score">0</span>
             </div>
         </div>
@@ -218,6 +268,7 @@
         let board = ['', '', '', '', '', '', '', '', ''];
         let currentPlayer = 'X';
         let gameActive = true;
+        let difficulty = 'medium';
         let scores = {
             X: 0,
             O: 0,
@@ -238,16 +289,129 @@
         const cells = document.querySelectorAll('.cell');
         const statusDisplay = document.querySelector('.status');
 
+        function setDifficulty(level) {
+            difficulty = level;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            resetGame();
+        }
+
         function handleCellClick(event) {
             const cell = event.target;
             const index = parseInt(cell.getAttribute('data-index'));
 
-            if (board[index] !== '' || !gameActive) {
+            if (board[index] !== '' || !gameActive || currentPlayer === 'O') {
                 return;
             }
 
             updateCell(cell, index);
             checkResult();
+            
+            // AI回合
+            if (gameActive && currentPlayer === 'O') {
+                setTimeout(aiMove, 500);
+            }
+        }
+
+        function aiMove() {
+            if (!gameActive) return;
+            
+            let move;
+            if (difficulty === 'easy') {
+                move = getRandomMove();
+            } else if (difficulty === 'medium') {
+                move = getMediumMove();
+            } else {
+                move = getBestMove();
+            }
+            
+            if (move !== -1) {
+                updateCell(cells[move], move);
+                checkResult();
+            }
+        }
+
+        function getRandomMove() {
+            const availableMoves = [];
+            for (let i = 0; i < 9; i++) {
+                if (board[i] === '') {
+                    availableMoves.push(i);
+                }
+            }
+            return availableMoves.length > 0 ? 
+                availableMoves[Math.floor(Math.random() * availableMoves.length)] : -1;
+        }
+
+        function getMediumMove() {
+            // 50%概率使用最佳策略，50%随机
+            if (Math.random() < 0.5) {
+                return getBestMove();
+            } else {
+                return getRandomMove();
+            }
+        }
+
+        function getBestMove() {
+            let bestScore = -Infinity;
+            let move = -1;
+            
+            for (let i = 0; i < 9; i++) {
+                if (board[i] === '') {
+                    board[i] = 'O';
+                    let score = minimax(board, 0, false);
+                    board[i] = '';
+                    if (score > bestScore) {
+                        bestScore = score;
+                        move = i;
+                    }
+                }
+            }
+            return move;
+        }
+
+        function minimax(board, depth, isMaximizing) {
+            let result = checkWinner();
+            if (result !== null) {
+                if (result === 'O') return 10 - depth;
+                if (result === 'X') return depth - 10;
+                return 0;
+            }
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'O';
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'X';
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        function checkWinner() {
+            for (let pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    return board[a];
+                }
+            }
+            return board.includes('') ? null : 'draw';
         }
 
         function updateCell(cell, index) {
@@ -274,7 +438,8 @@
             }
 
             if (roundWon) {
-                statusDisplay.textContent = `玩家 ${currentPlayer} 获胜！`;
+                const winner = currentPlayer === 'X' ? '你' : 'AI';
+                statusDisplay.textContent = `${winner} 获胜！`;
                 gameActive = false;
                 highlightWinningCells(winningPattern);
                 scores[currentPlayer]++;
@@ -291,7 +456,7 @@
             }
 
             currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-            statusDisplay.textContent = `玩家 ${currentPlayer} 的回合`;
+            statusDisplay.textContent = currentPlayer === 'X' ? '你的回合 (X)' : 'AI思考中...';
         }
 
         function highlightWinningCells(pattern) {
@@ -304,7 +469,7 @@
             board = ['', '', '', '', '', '', '', '', ''];
             gameActive = true;
             currentPlayer = 'X';
-            statusDisplay.textContent = '玩家 X 的回合';
+            statusDisplay.textContent = '你的回合 (X)';
             
             cells.forEach(cell => {
                 cell.textContent = '';
