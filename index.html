@@ -3,63 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeSugar's Portfolio</title>
+    <title>井字棋游戏</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             text-align: center;
         }
-        header {
-            padding: 20px;
-            background-color: #1e1e1e;
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
         }
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #1e1e1e;
+
+        .status {
+            font-size: 1.5em;
+            margin: 20px 0;
+            height: 40px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 120px);
+            grid-template-rows: repeat(3, 120px);
+            gap: 10px;
+            margin: 30px auto;
+            background: #667eea;
+            padding: 10px;
+            border-radius: 15px;
+        }
+
+        .cell {
+            background: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+
+        .cell:hover:not(.taken) {
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+
+        .cell.taken {
+            cursor: not-allowed;
+        }
+
+        .cell.x {
+            color: #667eea;
+            animation: fadeIn 0.3s;
+        }
+
+        .cell.o {
+            color: #764ba2;
+            animation: fadeIn 0.3s;
+        }
+
+        .cell.winner {
+            background: #ffd700;
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .reset-btn:active {
+            transform: translateY(0);
+        }
+
+        .score {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            font-size: 1.2em;
+        }
+
+        .score-item {
+            padding: 10px 20px;
+            background: #f0f0f0;
             border-radius: 10px;
         }
-        a {
-            color: #00bfff;
-            text-decoration: none;
+
+        .score-item span {
+            font-weight: bold;
+            font-size: 1.3em;
         }
-        a:hover {
-            text-decoration: underline;
+
+        .x-score {
+            color: #667eea;
+        }
+
+        .o-score {
+            color: #764ba2;
+        }
+
+        @media (max-width: 480px) {
+            .board {
+                grid-template-columns: repeat(3, 90px);
+                grid-template-rows: repeat(3, 90px);
+            }
+
+            .cell {
+                font-size: 2em;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>LifeSugar</h1>
-        <p>Technical Artist | Graphics Programmer | Game Developer</p>
-    </header>
-    <div class="container">
-        <h2>About Me</h2>
-        <p>Currently studying MSc Serious Games at Glasgow School of Art. Passionate about Technical Art, Shader development, and rendering optimization.</p>
+    <div class="game-container">
+        <h1>井字棋</h1>
+        <div class="status">玩家 X 的回合</div>
         
-        <h2>Skills</h2>
-        <ul>
-            <li>Unity SRP & Shader Graph</li>
-            <li>Custom Shader Development (HLSL, ShaderLab)</li>
-            <li>VFX & Rendering Optimization</li>
-            <li>Game Art Pipeline & Asset Optimization</li>
-        </ul>
-        
-        <h2>Projects</h2>
-        <ul>
-            <li><a href="https://github.com/LifeSugar" target="_blank">GitHub Repositories</a></li>
-            <li><a href="#">ArtStation (Add Your Link Here)</a></li>
-            <li><a href="#">Personal Game Projects</a></li>
-        </ul>
-        
-        <h2>Contact</h2>
-        <p>Email: your-email@example.com</p>
-        <p>LinkedIn: <a href="#">Your LinkedIn (Add Link)</a></p>
+        <div class="board">
+            <button class="cell" data-index="0"></button>
+            <button class="cell" data-index="1"></button>
+            <button class="cell" data-index="2"></button>
+            <button class="cell" data-index="3"></button>
+            <button class="cell" data-index="4"></button>
+            <button class="cell" data-index="5"></button>
+            <button class="cell" data-index="6"></button>
+            <button class="cell" data-index="7"></button>
+            <button class="cell" data-index="8"></button>
+        </div>
+
+        <div class="controls">
+            <button class="reset-btn" onclick="resetGame()">重新开始</button>
+        </div>
+
+        <div class="score">
+            <div class="score-item">
+                <div>玩家 X</div>
+                <span class="x-score" id="x-score">0</span>
+            </div>
+            <div class="score-item">
+                <div>平局</div>
+                <span id="draw-score">0</span>
+            </div>
+            <div class="score-item">
+                <div>玩家 O</div>
+                <span class="o-score" id="o-score">0</span>
+            </div>
+        </div>
     </div>
+
+    <script>
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let scores = {
+            X: 0,
+            O: 0,
+            draw: 0
+        };
+
+        const winPatterns = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        const cells = document.querySelectorAll('.cell');
+        const statusDisplay = document.querySelector('.status');
+
+        function handleCellClick(event) {
+            const cell = event.target;
+            const index = parseInt(cell.getAttribute('data-index'));
+
+            if (board[index] !== '' || !gameActive) {
+                return;
+            }
+
+            updateCell(cell, index);
+            checkResult();
+        }
+
+        function updateCell(cell, index) {
+            board[index] = currentPlayer;
+            cell.textContent = currentPlayer;
+            cell.classList.add('taken');
+            cell.classList.add(currentPlayer.toLowerCase());
+        }
+
+        function checkResult() {
+            let roundWon = false;
+            let winningPattern = null;
+
+            for (let i = 0; i < winPatterns.length; i++) {
+                const [a, b, c] = winPatterns[i];
+                if (board[a] === '' || board[b] === '' || board[c] === '') {
+                    continue;
+                }
+                if (board[a] === board[b] && board[b] === board[c]) {
+                    roundWon = true;
+                    winningPattern = winPatterns[i];
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                statusDisplay.textContent = `玩家 ${currentPlayer} 获胜！`;
+                gameActive = false;
+                highlightWinningCells(winningPattern);
+                scores[currentPlayer]++;
+                updateScoreDisplay();
+                return;
+            }
+
+            if (!board.includes('')) {
+                statusDisplay.textContent = '平局！';
+                gameActive = false;
+                scores.draw++;
+                updateScoreDisplay();
+                return;
+            }
+
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            statusDisplay.textContent = `玩家 ${currentPlayer} 的回合`;
+        }
+
+        function highlightWinningCells(pattern) {
+            pattern.forEach(index => {
+                cells[index].classList.add('winner');
+            });
+        }
+
+        function resetGame() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+            currentPlayer = 'X';
+            statusDisplay.textContent = '玩家 X 的回合';
+            
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('taken', 'x', 'o', 'winner');
+            });
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('x-score').textContent = scores.X;
+            document.getElementById('o-score').textContent = scores.O;
+            document.getElementById('draw-score').textContent = scores.draw;
+        }
+
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+    </script>
 </body>
 </html>
